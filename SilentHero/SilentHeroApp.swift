@@ -1,20 +1,25 @@
-//
-//  SilentHeroApp.swift
-//  SilentHero
-//
-//  Created by Hirushan on 2025-07-10.
-//
+import SwiftUI
 
 import SwiftUI
 
 @main
 struct SilentHeroApp: App {
     let persistenceController = PersistenceController.shared
+    @AppStorage("token") var token: String = ""
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            if token.isEmpty {
+                LoginView()
+                    .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            } else {
+                NavigationStack {
+                    SplashScreenView()
+                        .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                }
+            }
         }
     }
 }
+
+
