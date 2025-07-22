@@ -5,40 +5,60 @@ struct AddMoodEntryView: View {
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("How are you feeling?")
-                    .foregroundColor(AppColors.calmBlue)) {
-                    TextField("Mood (e.g., Happy, Stressed)", text: $viewModel.mood)
-                        .foregroundColor(.primary)
-                }
+        VStack(alignment: .leading, spacing: 20) {
+            Text("How are you feeling?")
+                .font(.headline)
+                .foregroundColor(AppColors.calmBlue)
 
-                Section(header: Text("Notes (optional)")
-                    .foregroundColor(AppColors.calmBlue)) {
-                    TextEditor(text: $viewModel.notes)
-                        .frame(height: 120)
-                        .foregroundColor(.primary)
-                        .background(AppColors.neutralGray.opacity(0.2))
-                        .cornerRadius(8)
-                }
-            }
-            .navigationTitle("New Mood Entry")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        viewModel.saveMoodEntry()
-                        dismiss()
-                    }
-                    .foregroundColor(AppColors.calmBlue)
-                }
+            TextField("e.g., Happy, Anxious", text: $viewModel.mood)
+                .padding(12)
+                .background(Color(.systemBackground))
+                .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                )
 
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                    .foregroundColor(AppColors.alertRed)
+            Text("Add some notes (optional)")
+                .font(.headline)
+                .foregroundColor(AppColors.calmBlue)
+
+            TextEditor(text: $viewModel.notes)
+                .frame(height: 120)
+                .padding(8)
+                .background(Color(.systemBackground))
+                .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                )
+
+            Spacer()
+
+            HStack(spacing: 16) {
+                Button("Cancel") {
+                    dismiss()
                 }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(AppColors.alertRed.opacity(0.9))
+                .foregroundColor(.white)
+                .cornerRadius(12)
+
+                Button("Save") {
+                    viewModel.saveMoodEntry()
+                    dismiss()
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(AppColors.calmBlue)
+                .foregroundColor(.white)
+                .cornerRadius(12)
             }
         }
+        .padding()
+        .background(AppColors.neutralGray.ignoresSafeArea())
+        .presentationDetents([.medium]) // 👈 Makes it a card-style sheet
+        .presentationDragIndicator(.visible)
     }
 }
