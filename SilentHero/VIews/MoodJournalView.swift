@@ -12,10 +12,18 @@ struct MoodJournalView: View {
     @State private var showAddMood = false
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                AppColors.neutralGray.ignoresSafeArea()
+        ZStack {
+            AppColors.neutralGray.ignoresSafeArea()
 
+            if moodEntries.isEmpty {
+                VStack {
+                    Spacer()
+                    Text("No mood entries yet.")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    Spacer()
+                }
+            } else {
                 List {
                     ForEach(moodEntries) { entry in
                         VStack(alignment: .leading, spacing: 6) {
@@ -39,21 +47,22 @@ struct MoodJournalView: View {
                 }
                 .listStyle(.plain)
             }
-            .navigationTitle("Mood Journal")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    EditButton().foregroundColor(AppColors.alertRed)
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showAddMood = true }) {
-                        Label("Add Entry", systemImage: "plus")
-                            .foregroundColor(AppColors.calmBlue)
-                    }
+        }
+        .navigationTitle("Mood Journal")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                EditButton().foregroundColor(AppColors.alertRed)
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: { showAddMood = true }) {
+                    Label("Add Entry", systemImage: "plus")
+                        .foregroundColor(AppColors.calmBlue)
                 }
             }
-            .sheet(isPresented: $showAddMood) {
-                AddMoodEntryView()
-            }
+        }
+        .sheet(isPresented: $showAddMood) {
+            AddMoodEntryView()
+                .environment(\.managedObjectContext, viewContext)
         }
     }
 

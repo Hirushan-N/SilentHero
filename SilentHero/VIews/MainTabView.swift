@@ -5,11 +5,13 @@ struct MainTabView: View {
 
     var body: some View {
         TabView {
-            MoodJournalView()
-                .environment(\.managedObjectContext, viewContext) // ✅ Pass context explicitly
-                .tabItem {
-                    Label("Journal", systemImage: "book")
-                }
+            NavigationStack {
+                MoodJournalView()
+            }
+            .environment(\.managedObjectContext, viewContext)
+            .tabItem {
+                Label("Journal", systemImage: "book")
+            }
 
             PanicView()
                 .tabItem {
