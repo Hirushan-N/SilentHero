@@ -9,6 +9,8 @@ struct MoodJournalView: View {
         animation: .default
     ) private var moodEntries: FetchedResults<MoodEntry>
 
+    @StateObject private var viewModel = MoodEntryViewModel()
+
     @State private var selectedFilter = "All"
     @State private var showAddMood = false
 
@@ -56,7 +58,7 @@ struct MoodJournalView: View {
                         .padding(.top, 10)
                     }
 
-                    // Always scrollable content
+                    // Scrollable content
                     ScrollView {
                         VStack(spacing: 12) {
                             if filteredEntries.isEmpty {
@@ -104,47 +106,15 @@ struct MoodJournalView: View {
                 }
             }
             .navigationTitle("Mood Journal")
-            .onAppear(perform: syncFromAPI)
+            .onAppear {
+                viewModel.syncMoodEntriesWithAPI()
+            }
         }
         .sheet(isPresented: $showAddMood) {
             AddMoodEntryView()
                 .environment(\.managedObjectContext, viewContext)
         }
     }
-
-    // MARK: - Sync from API
-    private func syncFromAPI() {
-        APIService.shared.fetchMoodEntries { entries in
-            DispatchQueue.main.async {
-                // 1. Delete all existing entries in Core Data
-                let fetchRequest: NSFetchRequest<NSFetchRequestResult> = MoodEntry.fetchRequest()
-                let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-
-                do {
-                    try viewContext.execute(deleteRequest)
-                    try viewContext.save()
-                } catch {
-                    print("Failed to clear Core Data before syncing: \(error)")
-                }
-
-                // 2. Insert fresh entries from API
-                for dto in entries {
-                    let mood = MoodEntry(context: viewContext)
-                    mood.id = dto.id
-                    mood.mood = dto.mood
-                    mood.notes = dto.notes
-                    mood.createdAt = dto.createdAt
-                }
-
-                do {
-                    try viewContext.save()
-                } catch {
-                    print("Failed to save synced entries: \(error)")
-                }
-            }
-        }
-    }
-
 
     // MARK: - Delete Entry
     private func delete(_ entry: MoodEntry) {

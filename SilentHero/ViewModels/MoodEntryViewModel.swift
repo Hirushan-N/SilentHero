@@ -8,6 +8,7 @@ class MoodEntryViewModel: ObservableObject {
 
     private let context = PersistenceController.shared.container.viewContext
 
+    // MARK: - Save new mood entry
     func saveMoodEntry() {
         let newEntryDTO = MoodEntryDTO(
             id: UUID(),
@@ -27,6 +28,17 @@ class MoodEntryViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Sync entries from API
+    func syncMoodEntriesWithAPI() {
+        APIService.shared.fetchMoodEntries { entries in
+            DispatchQueue.main.async {
+                self.clearCoreData()
+                entries.forEach { self.saveToCoreData(dto: $0) }
+            }
+        }
+    }
+
+    // MARK: - Save to Core Data
     private func saveToCoreData(dto: MoodEntryDTO) {
         let newEntry = MoodEntry(context: context)
         newEntry.id = dto.id
@@ -39,6 +51,20 @@ class MoodEntryViewModel: ObservableObject {
             print("✅ Mood saved locally")
         } catch {
             print("❌ Core Data save failed: \(error)")
+        }
+    }
+
+    // MARK: - Clear existing Core Data entries
+    private func clearCoreData() {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = MoodEntry.fetchRequest()
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+
+        do {
+            try context.execute(deleteRequest)
+            try context.save()
+            print("🧼 Cleared old Core Data mood entries")
+        } catch {
+            print("❌ Failed to clear Core Data: \(error)")
         }
     }
 }
